@@ -1,13 +1,19 @@
-import React, { Component } from 'react';
+import { Component, ChangeEvent } from 'react';
 import { TbUserSearch } from 'react-icons/tb';
-import ContactForm from 'components/ContactForm';
-import ContactTable from 'components/ContactTable';
-import Filter from 'components/Filter';
+import ContactForm from 'components/ContactForm/ContactForm';
+import { ContactTable } from 'components/ContactTable/ContactTable';
+import { Filter } from 'components/Filter/Filter';
 import { nanoid } from 'nanoid';
 import normalizePhoneNumber from '../../helpers/numberNormalize';
+import { Contact } from 'components/ContactTableItem/ContactTableItem.types';
 
-export default class App extends Component {
-  state = {
+interface AppState {
+  contacts: Contact[];
+  filter: string;
+}
+
+export default class App extends Component<{}, AppState> {
+  state: AppState = {
     contacts: [
       { id: 'id-1', name: 'Rosie Simpson', number: '459-12-56' },
       { id: 'id-2', name: 'Hermione Kline', number: '443-89-12' },
@@ -19,18 +25,18 @@ export default class App extends Component {
 
   componentDidMount = () => {
     const contacts = localStorage.getItem('contacts');
-    const parsedContacts = JSON.parse(contacts);
+    const parsedContacts = contacts ? JSON.parse(contacts) : null;
     if (parsedContacts) {
       this.setState({ contacts: parsedContacts });
     }
   };
-  componentDidUpdate = (prevProps, prevState) => {
+  componentDidUpdate = (prevProps: AppState, prevState: AppState) => {
     if (this.state.contacts !== prevState.contacts) {
       localStorage.setItem('contacts', JSON.stringify(this.state.contacts));
     }
   };
 
-  addContact = (name, number) => {
+  addContact = (name: string, number: string) => {
     const contact = {
       id: nanoid(),
       name,
@@ -41,13 +47,13 @@ export default class App extends Component {
     }));
   };
 
-  deleteContact = contactId => {
+  deleteContact = (contactId: string) => {
     this.setState(prevState => ({
       contacts: prevState.contacts.filter(contact => contact.id !== contactId),
     }));
   };
 
-  changeFilter = event => {
+  changeFilter = (event: ChangeEvent<HTMLInputElement>) => {
     this.setState({ filter: event.currentTarget.value });
   };
 
@@ -87,7 +93,7 @@ export default class App extends Component {
           opacity-40 z-10 text-filterPlaceholderColor md:w-5 md:h-5 
           md:top-16 md:left-1/4 md2:max-w-sm md2:top-9 md2:left-1/5 ssm:hidden"
           />
-          <Filter forFilter={filter} onChange={this.changeFilter} />
+          <Filter value={filter} onChange={this.changeFilter} />
           <ContactTable
             getVisibleContacts={visibleContacts}
             onDeleteContact={this.deleteContact}
